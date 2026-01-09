@@ -1,0 +1,340 @@
+import os
+
+dashboard_html = """
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم SnapMemo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+
+        :root {
+            --ink: #1c2430;
+            --muted: #667085;
+            --accent: #0ea5a4;
+            --accent-soft: #d7f5f4;
+            --card: #ffffff;
+            --border: #e6e9ef;
+            --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Tajawal", "Noto Kufi Arabic", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 15% 15%, #e8f4ff 0%, transparent 40%),
+                radial-gradient(circle at 85% 20%, #f7f0ff 0%, transparent 45%),
+                linear-gradient(120deg, #f5f7fb 0%, #f7f9fc 100%);
+            min-height: 100vh;
+        }
+
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 20px 60px;
+        }
+
+        .header {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 28px 28px 24px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: "";
+            position: absolute;
+            inset: -40% 60% auto -20%;
+            height: 220px;
+            background: linear-gradient(135deg, rgba(14, 165, 164, 0.18), transparent 60%);
+            border-radius: 40%;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: clamp(1.8rem, 2vw + 1rem, 2.6rem);
+            font-weight: 800;
+        }
+
+        .header p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin: 24px 0 32px;
+        }
+
+        .stat-card {
+            flex: 1 1 220px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 18px 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card span {
+            display: block;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .stat-card strong {
+            display: block;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 22px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+        }
+
+        .card-media {
+            position: relative;
+            padding-top: 70%;
+            background: #f0f2f7;
+        }
+
+        .card-media img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-body {
+            padding: 18px 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .chip {
+            background: var(--accent-soft);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .card-text {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #2b3441;
+        }
+
+        .card-footer {
+            padding: 0 20px 18px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .empty {
+            grid-column: 1 / -1;
+            background: var(--card);
+            border: 1px dashed var(--border);
+            border-radius: 18px;
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--muted);
+            box-shadow: var(--shadow);
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 22px 20px;
+            }
+
+            .card-footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <section class="header">
+            <h1>لوحة تحكم SnapMemo</h1>
+            <p>واجهة مرئية لمراجعة جميع الملاحظات والصور الملتقطة لحظة الكتابة، مرتبة حسب الوقت.</p>
+        </section>
+
+        <section class="stats">
+            <div class="stat-card">
+                <span>إجمالي الملاحظات</span>
+                <strong>{{ notes.count }}</strong>
+            </div>
+        </section>
+
+        <section class="grid">
+            {% for note in notes %}
+                <article class="card">
+                    <div class="card-media">
+                        {% if note.user_photo %}
+                            <a href="{{ note.user_photo.url }}" target="_blank" rel="noopener">
+                                <img src="{{ note.user_photo.url }}" alt="صورة المستخدم" loading="lazy">
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title">
+                            <span>ملاحظة رقم {{ note.id }}</span>
+                            <span class="chip">{{ note.created_at|date:"Y-m-d H:i" }}</span>
+                        </div>
+                        <div class="card-text">{{ note.content|linebreaksbr }}</div>
+                    </div>
+                    <div class="card-footer">
+                        {% if note.device_id %}
+                            <span>معرّف الجهاز: {{ note.device_id }}</span>
+                        {% else %}
+                            <span>معرّف الجهاز غير متوفر</span>
+                        {% endif %}
+                    </div>
+                </article>
+            {% empty %}
+                <div class="empty">
+                    لا توجد ملاحظات بعد. سيتم عرض الصور والمحتوى فور وصول أول ملاحظة.
+                </div>
+            {% endfor %}
+        </section>
+    </main>
+</body>
+</html>
+"""
+
+views_code = """
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import render
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import NoteSerializer
+from .models import Note
+
+
+class SaveNoteView(APIView):
+    def post(self, request):
+        serializer = NoteSerializer(data=request.data)
+        if serializer.is_valid():
+            note = serializer.save()
+
+            # Count per device when provided; otherwise fall back to total notes.
+            if note.device_id:
+                count = Note.objects.filter(device_id=note.device_id).count()
+            else:
+                count = Note.objects.count()
+
+            message = "Note Saved Successfully!"
+            reward = False
+
+            if count % 10 == 0:
+                message = f"Congratulations! You reached {count} notes. Reward unlocked!"
+                reward = True
+
+            return Response(
+                {
+                    "status": "success",
+                    "message": message,
+                    "reward": reward,
+                    "total_notes": count,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@staff_member_required
+def dashboard_view(request):
+    notes = Note.objects.all().order_by("-created_at")
+    return render(request, "dashboard.html", {"notes": notes})
+"""
+
+api_urls_code = """
+from django.urls import path
+from .views import SaveNoteView
+
+urlpatterns = [
+    path("save-note/", SaveNoteView.as_view(), name="save_note"),
+]
+"""
+
+main_urls_code = """
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from api.views import dashboard_view
+
+urlpatterns = [
+    path("", dashboard_view, name="dashboard"),
+    path("admin/", admin.site.urls),
+    path("api/", include("api.urls")),
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+"""
+
+
+def write_file(path, content):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as file:
+        file.write(content.strip() + "\n")
+    print(f"Updated/Created: {path}")
+
+
+if __name__ == "__main__":
+    write_file("api/templates/dashboard.html", dashboard_html)
+    write_file("api/views.py", views_code)
+    write_file("api/urls.py", api_urls_code)
+    write_file("snapmemo_backend/urls.py", main_urls_code)
+    print("Dashboard files generated successfully.")
