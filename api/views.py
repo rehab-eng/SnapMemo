@@ -1,5 +1,4 @@
-﻿from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import render
+﻿from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -39,7 +38,6 @@ class SaveNoteView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@staff_member_required
 def dashboard_view(request):
     notes = Note.objects.all().order_by("-created_at")
     return render(request, "api/dashboard.html", {"notes": notes})
