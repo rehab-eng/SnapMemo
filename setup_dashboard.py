@@ -1,4 +1,4 @@
-import os
+﻿import os
 
 dashboard_html = """
 <!DOCTYPE html>
@@ -6,7 +6,7 @@ dashboard_html = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم SnapMemo</title>
+    <title>Ù„ÙˆØ­Ø© ØªØ­ÙƒÙ… SnapMemo</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
 
@@ -203,13 +203,13 @@ dashboard_html = """
 <body>
     <main class="page">
         <section class="header">
-            <h1>لوحة تحكم SnapMemo</h1>
-            <p>واجهة مرئية لمراجعة جميع الملاحظات والصور الملتقطة لحظة الكتابة، مرتبة حسب الوقت.</p>
+            <h1>Ù„ÙˆØ­Ø© ØªØ­ÙƒÙ… SnapMemo</h1>
+            <p>ÙˆØ§Ø¬Ù‡Ø© Ù…Ø±Ø¦ÙŠØ© Ù„Ù…Ø±Ø§Ø¬Ø¹Ø© Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ù„Ø§Ø­Ø¸Ø§Øª ÙˆØ§Ù„ØµÙˆØ± Ø§Ù„Ù…Ù„ØªÙ‚Ø·Ø© Ù„Ø­Ø¸Ø© Ø§Ù„ÙƒØªØ§Ø¨Ø©ØŒ Ù…Ø±ØªØ¨Ø© Ø­Ø³Ø¨ Ø§Ù„ÙˆÙ‚Øª.</p>
         </section>
 
         <section class="stats">
             <div class="stat-card">
-                <span>إجمالي الملاحظات</span>
+                <span>Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ù…Ù„Ø§Ø­Ø¸Ø§Øª</span>
                 <strong>{{ notes.count }}</strong>
             </div>
         </section>
@@ -220,28 +220,28 @@ dashboard_html = """
                     <div class="card-media">
                         {% if note.user_photo %}
                             <a href="{{ note.user_photo.url }}" target="_blank" rel="noopener">
-                                <img src="{{ note.user_photo.url }}" alt="صورة المستخدم" loading="lazy">
+                                <img src="{{ note.user_photo.url }}" alt="ØµÙˆØ±Ø© Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…" loading="lazy">
                             </a>
                         {% endif %}
                     </div>
                     <div class="card-body">
                         <div class="card-title">
-                            <span>ملاحظة رقم {{ note.id }}</span>
+                            <span>Ù…Ù„Ø§Ø­Ø¸Ø© Ø±Ù‚Ù… {{ note.id }}</span>
                             <span class="chip">{{ note.created_at|date:"Y-m-d H:i" }}</span>
                         </div>
                         <div class="card-text">{{ note.content|linebreaksbr }}</div>
                     </div>
                     <div class="card-footer">
                         {% if note.device_id %}
-                            <span>معرّف الجهاز: {{ note.device_id }}</span>
+                            <span>Ù…Ø¹Ø±Ù‘Ù Ø§Ù„Ø¬Ù‡Ø§Ø²: {{ note.device_id }}</span>
                         {% else %}
-                            <span>معرّف الجهاز غير متوفر</span>
+                            <span>Ù…Ø¹Ø±Ù‘Ù Ø§Ù„Ø¬Ù‡Ø§Ø² ØºÙŠØ± Ù…ØªÙˆÙØ±</span>
                         {% endif %}
                     </div>
                 </article>
             {% empty %}
                 <div class="empty">
-                    لا توجد ملاحظات بعد. سيتم عرض الصور والمحتوى فور وصول أول ملاحظة.
+                    Ù„Ø§ ØªÙˆØ¬Ø¯ Ù…Ù„Ø§Ø­Ø¸Ø§Øª Ø¨Ø¹Ø¯. Ø³ÙŠØªÙ… Ø¹Ø±Ø¶ Ø§Ù„ØµÙˆØ± ÙˆØ§Ù„Ù…Ø­ØªÙˆÙ‰ ÙÙˆØ± ÙˆØµÙˆÙ„ Ø£ÙˆÙ„ Ù…Ù„Ø§Ø­Ø¸Ø©.
                 </div>
             {% endfor %}
         </section>
@@ -295,7 +295,7 @@ class SaveNoteView(APIView):
 @staff_member_required
 def dashboard_view(request):
     notes = Note.objects.all().order_by("-created_at")
-    return render(request, "dashboard.html", {"notes": notes})
+    return render(request, "api/dashboard.html", {"notes": notes})
 """
 
 api_urls_code = """
@@ -333,7 +333,7 @@ def write_file(path, content):
 
 
 if __name__ == "__main__":
-    write_file("api/templates/dashboard.html", dashboard_html)
+    write_file("api/templates/api/dashboard.html", dashboard_html)
     write_file("api/views.py", views_code)
     write_file("api/urls.py", api_urls_code)
     write_file("snapmemo_backend/urls.py", main_urls_code)
